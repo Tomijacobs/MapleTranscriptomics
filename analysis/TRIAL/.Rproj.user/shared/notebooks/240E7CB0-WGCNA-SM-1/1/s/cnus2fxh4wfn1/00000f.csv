@@ -1,0 +1,42 @@
+"0","library(WGCNA)"
+"2","Loading required package: dynamicTreeCut
+"
+"2","Loading required package: fastcluster
+"
+"2","
+Attaching package: ‘fastcluster’
+
+"
+"2","The following object is masked from ‘package:stats’:
+
+    hclust
+
+"
+"2","
+"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"2","
+Attaching package: ‘WGCNA’
+
+"
+"2","The following object is masked from ‘package:IRanges’:
+
+    cor
+
+"
+"2","The following object is masked from ‘package:S4Vectors’:
+
+    cor
+
+"
+"2","The following object is masked from ‘package:stats’:
+
+    cor
+
+"
+"0","options(stringsAsFactors = FALSE)"
+"0","SM <- read.delim('SMGenecountsVarStabTr.txt')"
+"0","datExpr <- as.data.frame(t(SM))"

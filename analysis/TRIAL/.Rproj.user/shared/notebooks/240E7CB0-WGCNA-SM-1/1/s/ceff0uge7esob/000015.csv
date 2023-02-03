@@ -1,0 +1,8 @@
+"0",""
+"0","dds <- DESeqDataSetFromMatrix(countData = cts,colData = coldata,design = ~ condition)"
+"0","dim(dds)"
+"1","[1]"
+"1"," 218885"
+"1","     16"
+"1","
+"

@@ -1,0 +1,2 @@
+"0","softPower = 5;"
+"0","adjacency = adjacency(datExpr, power = softPower);"

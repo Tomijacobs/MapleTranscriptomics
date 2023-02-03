@@ -1,0 +1,6 @@
+"0","sizeGrWindow(9, 5)"
+"0","par(mfrow = c(1,2));"
+"0","cex1 = 0.9;"
+"0","plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],"
+"0","     xlab=""Soft Threshold (power)"",ylab=""Scale Free Topology Model Fit,signed R^2"",type=""n"","
+"0","     main = paste(""Scale independence""));"

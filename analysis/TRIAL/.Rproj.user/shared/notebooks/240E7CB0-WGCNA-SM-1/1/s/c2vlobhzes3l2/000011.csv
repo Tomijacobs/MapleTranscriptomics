@@ -1,0 +1,6 @@
+"0","# Turn adjacency into topological overlap"
+"0","TOM = TOMsimilarity(adjacency);"
+"1","..connectivity..
+"
+"1","..matrix multiplication (system BLAS)..
+"

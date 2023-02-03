@@ -1,0 +1,45 @@
+---
+title: "WGCNA-TOMI-J"
+output: html_document
+date: "2023-01-31"
+---
+
+```{r}
+install.packages("pheatmap")
+```
+
+```{r}
+install.packages("reshape2")
+```
+```{r}
+install.packages("rgl")
+```
+
+```{r}
+install.packages("apeglm")
+```
+
+
+```{r}
+library('DESeq2')
+library("pheatmap")
+library(ggplot2)
+library(reshape2)
+library(scales)
+#library("rgl")  
+library("genefilter")  # for rowVars()
+require(stringr) # for str_sub()
+#library(apeglm)
+
+cts = as.matrix(read.delim('Gene_level_counts_sugarmaple.txt',row.names="gene_id"))
+coldata = read.delim('SugarMapleSampleInfo.txt',row.names=1)
+coldata$condition = factor(coldata$condition)
+
+
+head(cts,2)
+coldata
+
+dds <- DESeqDataSetFromMatrix(countData = cts,colData = coldata,design = ~ condition)
+dim(dds)
+```
+

@@ -1,0 +1,213 @@
+---
+title: "Gene Correlations"
+output: html_document
+date: "2023-02-01"
+---
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("limma")
+```
+
+```{r}
+#install.packages("RColorBrewer")
+#install.packages("ComplexHeatmap")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("RColorBrewer")
+```
+
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("org.At.tair.db")
+```
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("BSgenome.Athaliana.TAIR.TAIR9") 
+```
+
+```{r}
+#keytypes("BSgenome.Athaliana.TAIR.TAIR9")
+# install if necessary
+BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
+```
+
+
+```{r}
+#if (!require("BiocManager", quietly = TRUE))
+   # install.packages("BiocManager")
+
+#BiocManager::install("genomes")
+```
+
+```{r}
+install.packages("tidyverse")
+```
+
+```{r}
+install.packages("rlang")
+library(tidyverse)
+```
+
+
+```{r}
+install.packages("gplots")
+library("gplots")
+library("ggplot2")
+library("knitr")
+library("limma")
+library("reshape2")
+library("RColorBrewer")
+library("WGCNA")
+```
+
+```{r}
+library(readr)
+Sample_Metadata <- read_csv("Sample_Metadata.csv")
+Sample_Metadata$Condition <- gsub("-", "_", Sample_Metadata$Condition)
+Sample_Metadata$Condition <- paste("s", Sample_Metadata$Condition, sep = "")
+head(Sample_Metadata)
+dim(Sample_Metadata)
+```
+
+```{r}
+library(readr)
+Transcript_count <- as.data.frame(read_csv("Transcript_Count.csv", row.names(1), col_names = T, show_col_types = F))
+#Transcript_count <- function (row.names=1)
+#Transcript_count <- 
+head(Transcript_count)
+dim(Transcript_count)
+
+rownames(Transcript_count) <- Transcript_count[,1]
+num_Transcript_count <- Transcript_count[,-1]
+colnames(num_Transcript_count) <- gsub("-", "_", colnames(num_Transcript_count))
+colnames(num_Transcript_count) <- paste("s", colnames(num_Transcript_count), sep = "")
+head(num_Transcript_count)
+```
+
+```{r}
+#biocLite("org.At.tair.db")
+ 
+# load library
+library(org.At.tair.db)
+keytypes(org.At.tair.db)
+columns(org.At.tair.db)
+#[1] "ARACYC"       "ARACYCENZYME" "ENTREZID"     "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "GENENAME"     "GO"          
+# [9] "GOALL"        "ONTOLOGY"     "ONTOLOGYALL"  "PATH"         "PMID"         "REFSEQ"       "SYMBOL"       "TAIR"        
+# [1] "ARACYC"       "ARACYCENZYME" "ENTREZID"     "ENZYME"       "EVIDENCE"     "EVIDENCEALL"  "GENENAME"     "GO"          
+#[9] "GOALL"        "ONTOLOGY"     "ONTOLOGYALL"  "PATH"         "PMID"         "REFSEQ"       "SYMBOL"       "TAIR"  
+```
+
+```{r}
+#Example
+gene_ids <- head(keys(org.At.tair.db, keytype="ENTREZID"), 2)
+select(org.At.tair.db, keytype= "ENTREZID", keys=gene_ids,
+       columns=c("PMID", "TAIR", "GO", "ONTOLOGYALL"))
+```
+
+```{r}
+#add a colorbar along the heatmap with sample condition
+Sample_Metadata$Condition <- as.factor(Sample_Metadata$Condition)
+num_Condition <- nlevels(Sample_Metadata$Condition) 
+pal <- colorRampPalette(brewer.pal(9, "Set1")) (num_Condition)
+cond_colors <- pal[as.integer(Sample_Metadata$Condition)]
+#plot_ly(df2, x = ~theta, y = ~values, color = ~ind, colors = "Set2")
+#plot_ly(df2, x = ~theta, y = ~values, color = ~ind, colors = RColorBrewer::brewer.pal(3, "Set2")[1:2])
+```
+
+```{r}
+install.packages("heatmap.2")
+```
+
+
+```{r}
+heatmap.2(WGCNA::cor(num_Transcript_count), RowSideColors = cond_colors,
+          trace="none", main = "Sample correlations (Conditions)")
+```
+
+
+```{r}
+#Low coount filtering
+#Removing all rows with less than n counts across all samples where n=#samples
+low_count_mask <- rowSums(num_Transcript_count) < ncol(num_Transcript_count)
+
+#sprintf("Removing %d low-count genes (% remaining).", sum(low_count_mask),
+        sum(!low_count_mask)
+sprintf("Removing %d low-count genes (%d remaining).",sum(low_count_mask), sum(!low_count_mask))
+filt_num_Transcript_count <- num_Transcript_count[!low_count_mask,]
+
+#sprintf("Removing %d num_Transcript_count (% remaining).", sum(num_Transcript_count),
+        sum(!num_Transcript_count)
+```
+
+
+```{r}
+log_counts <- log2(num_Transcript_count + 1)
+x = melt(as.matrix(log_counts))
+
+colnames(x) = c("gene_id", "sample", "value")
+ggplot(x, aes(x=value, color=sample)) + geom_density()
+```
+
+```{r}
+heatmap.2(cor(log_counts), RowSideColors=cond_colors,
+          trace="none", main="Sample correlations (log2-transformed)")
+```
+
+```{r}
+#removing genes with zero variance 
+log_counts <- log_counts[apply(log_counts, 1, var) > 0,]
+
+#creating design matrix for differential expression analysis;
+#fixing a linear model at this step
+`[.closure` <- function (x, ..., drop = TRUE) { ... }
+mod <- model.matrix(~0+Sample_Metadata$Condition)
+
+#makes model easier to work with
+colnames(mod) <- levels(Sample_Metadata$Condition)
+
+fit <- lmFit(log_counts, design=mod)
+
+#generating a list of all possible contrasts
+condition_pairs <- t(combn(levels(Sample_Metadata$Condition), 2))
+
+comparisons <- list()
+for (i in 1:nrow(condition_pairs)) {
+  comparisons[[i]] <- as.character(condition_pairs[i,])
+}
+```
+
+
+```{r}
+#vector to store differentially expressed genes
+sig_genes <- c()
+
+#iterating over the contrasts, and performing a differential expression test for each pair
+for (conds in comparisons) {
+  #generating string contrats formula
+  contrast_formula <- paste(conds, collapse = ' - ')
+  
+  contrast_mat <- makeContrasts(contrasts=contrast_formula, levels=mod)
+  contrast_fit <- contrasts.fit(fit, contrast_mat)
+  eb <- eBayes(contrast_fit)
+  
+  #grabbing higly ranked genes; this is a very stringet p-value cut off, but
+  #it serves to limit the total number of genes 
+  sig_genes <- union(sig_genes,
+                     rownames(topTable(eb, number = Inf, p.value = 0.005)))
+}
+
+#filtering out genes which were not differentially expressed for any contrast
+log_counts <- log_counts[rownames(log_counts) %in% sig_genes,]
+```
+
+

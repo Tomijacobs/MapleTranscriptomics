@@ -1,0 +1,2 @@
+"0","text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],"
+"0","     labels=powers,cex=cex1,col=""red"");"

@@ -1,0 +1,1 @@
+"0","write.table(assay(vsd), file = 'SMGenecountsVarStabTr.txt', row.names = TRUE, col.names = TRUE, sep = ""\t"")"

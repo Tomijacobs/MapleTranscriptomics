@@ -1,0 +1,2 @@
+"0","vsd <- varianceStabilizingTransformation(dds, blind = FALSE)"
+"0","plotPCA(vsd, intgroup = c('condition'), returnData = FALSE)"

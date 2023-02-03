@@ -1,0 +1,17 @@
+sample	condition
+s14D_7	14d
+s14D_6	14d
+s14D_5	14d
+C_1	ctrl
+s7D_2	07d
+s7D_3	07d
+C_2	ctrl
+C_5	ctrl
+s14D_3	14d
+s7D_6	07d
+C_6	ctrl
+s7D_7	07d
+s21D_7	21d
+s21D_6	21d
+s21D_5	21d
+s21D_3	21d
